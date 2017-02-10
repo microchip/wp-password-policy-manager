@@ -441,6 +441,12 @@ class WpPasswordPolicyManager
     public function ValidatePasswordReset( WP_Error $errors, $user ) {
         $rm = strtoupper($_SERVER['REQUEST_METHOD']);
         if ('POST' == $rm) {
+            // Workaround for WooCommerce renaming the pass1/pass2 fields to password_1 and password_2
+            if ( class_exists( 'WooCommerce' ) && (!isset($_POST['pass1']) || !isset($_POST['pass2']) ) && (isset($_POST['password_1']) && isset($_POST['password_2'])) ) {
+                $_POST['pass1'] = &$_POST['password_1'];
+                $_POST['pass2'] = &$_POST['password_2'];
+            }
+            
             if (!isset($_POST['pass1']) || !isset($_POST['pass2'])) {
                 $errors->add('expired_password', __('The form is not valid. Please refresh the page and try again.', 'wp-password-policy-manager'));
                 return $errors;
